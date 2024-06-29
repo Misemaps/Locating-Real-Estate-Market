@@ -1,0 +1,2009 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="styles.css">
+        <meta http-equiv="cache-control"content='no-cache'>
+        <meta http-equiv="expires"content='0'>
+        <meta http-equiv="pragma"content='no-cache'>
+    
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            z-index: 1;
+        }
+        </style>
+        <title></title>
+
+   </head>
+    <body>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="Logo.png" alt="Company Logo" width="140" height="35">
+            </div>
+            <div class="logo-center">
+                <img src="Logo2.png" alt="Logo 2" width="180" height="35">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="About Us.html">ABOUT US</a></li>
+                <li><a href="Services.html">SERVICES</a></li>
+                <li><a href="Contact Us.html">CONTACT</a></li>
+            </ul>
+            <div class="dropdown">
+                <button class="dropbtn" onclick="toggleDropdown()">☰</button>
+                <div class="dropdown-content">
+                    <a href="index.html">HOME</a>
+                    <a href="About Us.html">ABOUT US</a>
+                    <a href="Services.html">SERVICES</a>
+                    <a href="Contact Us.html">CONTACT</a>
+                </div>
+            </div>
+        </nav>
+        
+        <script>
+        function toggleDropdown() {
+            const dropdownContent = document.querySelector('.dropdown-content');
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                const dropdowns = document.getElementsByClassName('dropdown-content');
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.style.display === 'block') {
+                        openDropdown.style.display = 'none';
+                    }
+                }
+            }
+        }
+        </script>
+        
+
+
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/LANDFORLEASE_1.js"></script>
+        <script src="data/LANDFORSALE_2.js"></script>
+        <script src="data/HOUSEFORSALE_3.js"></script>
+        <script src="data/GODOWN_4.js"></script>
+        <script src="data/WAREHOUSE_5.js"></script>
+        <script src="data/RETAILSPACE_6.js"></script>
+        <script src="data/OFFICESPACE_7.js"></script>
+        <script src="data/57BEDROOM_8.js"></script>
+        <script src="data/34BEDROOM_9.js"></script>
+        <script src="data/2BEDROOM_10.js"></script>
+        <script src="data/1BEDROOM_11.js"></script>
+        <script src="data/SINGLEROOM_12.js"></script>
+        <script src="data/BEDSITTER_13.js"></script>
+        <script src="data/STUDIO_14.js"></script>
+        <script src="data/AIRbnb_15.js"></script>
+        <script>
+            function iniMap() {
+        var location={lat:-1.292066,lng:36.821945};
+        var map= new google.maps.Map(document.getElementById("map"),{
+            zoom:4,
+             center:location
+       });
+       var marker=new google.maps.Marker({
+        position:location,
+        map:map
+       });
+    }
+ </script>
+ <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_hB7fPf4tV3oaji9YB8gDjxXOPoSDT8M&callback=initMap"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+        map.createPane('pane_GoogleHybrid_0');
+        map.getPane('pane_GoogleHybrid_0').style.zIndex = 400;
+        var layer_GoogleHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleHybrid_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleHybrid_0;
+        map.addLayer(layer_GoogleHybrid_0);
+        function pop_LANDFORLEASE_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="sample1.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_LANDFORLEASE_1_0() {
+            return {
+                pane: 'pane_LANDFORLEASE_1',
+                opacity: 1,
+                color: 'rgba(247,48,36,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_LANDFORLEASE_1');
+        map.getPane('pane_LANDFORLEASE_1').style.zIndex = 401;
+        map.getPane('pane_LANDFORLEASE_1').style['mix-blend-mode'] = 'normal';
+        var layer_LANDFORLEASE_1 = new L.geoJson(json_LANDFORLEASE_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_LANDFORLEASE_1',
+            layerName: 'layer_LANDFORLEASE_1',
+            pane: 'pane_LANDFORLEASE_1',
+            onEachFeature: pop_LANDFORLEASE_1,
+            style: style_LANDFORLEASE_1_0,
+        });
+        bounds_group.addLayer(layer_LANDFORLEASE_1);
+        map.addLayer(layer_LANDFORLEASE_1);
+        function pop_LANDFORSALE_2(feature, layer) {
+    layer.on({
+        mouseout: function(e) {
+            // Start blinking when the mouse is out of the feature
+            e.target.getElement().classList.add('blink');
+
+            for (var i in e.target._eventParents) {
+                if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                    e.target._eventParents[i].resetStyle(e.target);
+                }
+            }
+
+            // Delay closing the popup by 3 seconds
+            setTimeout(function() {
+                if (typeof layer.closePopup == 'function') {
+                    layer.closePopup();
+                } else {
+                    layer.eachLayer(function(feature) {
+                        feature.closePopup();
+                    });
+                }
+            }, 3000);
+        },
+        mouseover: function(e) {
+            // Stop blinking when the mouse is over the feature
+            e.target.getElement().classList.remove('blink');
+            highlightFeature(e);
+        }
+    });
+
+    var popupContent = '<table>\
+        <tr>\
+            <th scope="row">No</th>\
+            <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Details</th>\
+            <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Details2</th>\
+            <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Details3</th>\
+            <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Contact</th>\
+            <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Contact2</th>\
+            <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtube-logo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+    </table>';
+
+    var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+
+    layer.on('popupopen', function(e) {
+        addClassToPopupIfMedia(content, e.popup);
+    });
+
+    layer.bindPopup(content, { maxHeight: 400 });
+
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_LANDFORSALE_2.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+}
+
+function style_LANDFORSALE_2_0() {
+    return {
+        pane: 'pane_LANDFORSALE_2',
+        opacity: 1,
+        color: 'rgba(2,19,242,1.0)',
+        dashArray: '',
+        lineCap: 'butt',
+        lineJoin: 'miter',
+        weight: 5.0, 
+        fillOpacity: 0,
+        interactive: true,
+    }
+}
+
+map.createPane('pane_LANDFORSALE_2');
+map.getPane('pane_LANDFORSALE_2').style.zIndex = 402;
+map.getPane('pane_LANDFORSALE_2').style['mix-blend-mode'] = 'normal';
+
+var layer_LANDFORSALE_2 = new L.geoJson(json_LANDFORSALE_2, {
+    attribution: '',
+    interactive: true,
+    dataVar: 'json_LANDFORSALE_2',
+    layerName: 'layer_LANDFORSALE_2',
+    pane: 'pane_LANDFORSALE_2',
+    onEachFeature: pop_LANDFORSALE_2,
+    style: style_LANDFORSALE_2_0,
+});
+
+bounds_group.addLayer(layer_LANDFORSALE_2);
+map.addLayer(layer_LANDFORSALE_2);
+
+       
+function pop_HOUSEFORSALE_3(feature, layer) {
+    layer.on({
+        mouseout: function(e) {
+            // Start blinking when the mouse is out of the feature
+            e.target.getElement().classList.add('blink');
+
+            for (var i in e.target._eventParents) {
+                if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                    e.target._eventParents[i].resetStyle(e.target);
+                }
+            }
+
+            // Delay closing the popup by 3 seconds
+            setTimeout(function() {
+                if (typeof layer.closePopup == 'function') {
+                    layer.closePopup();
+                } else {
+                    layer.eachLayer(function(feature) {
+                        feature.closePopup();
+                    });
+                }
+            }, 3000);
+        },
+        mouseover: function(e) {
+            // Stop blinking when the mouse is over the feature
+            e.target.getElement().classList.remove('blink');
+            highlightFeature(e);
+        }
+    });
+
+    var popupContent = '<table>\
+        <tr>\
+            <th scope="row">No</th>\
+            <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Details</th>\
+            <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row"></th>\
+            <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row"></th>\
+            <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Contact</th>\
+            <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Contact2</th>\
+            <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="sample1.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="video.mp4" target="_blank" class="video-link"><img src="video.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+    </table>';
+
+    var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+
+    layer.on('popupopen', function(e) {
+        addClassToPopupIfMedia(content, e.popup);
+    });
+
+    layer.bindPopup(content, { maxHeight: 400 });
+
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_HOUSEFORSALE_3.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+}
+
+function style_HOUSEFORSALE_3_0() {
+    return {
+        pane: 'pane_HOUSEFORSALE_3',
+        opacity: 1,
+        color: 'rgba(252,252,34,1.0)',
+        dashArray: '',
+        lineCap: 'butt',
+        lineJoin: 'miter',
+        weight: 5.0,
+        fillOpacity: 0,
+        interactive: true,
+    }
+}
+
+map.createPane('pane_HOUSEFORSALE_3');
+map.getPane('pane_HOUSEFORSALE_3').style.zIndex = 403;
+map.getPane('pane_HOUSEFORSALE_3').style['mix-blend-mode'] = 'normal';
+
+var layer_HOUSEFORSALE_3 = new L.geoJson(json_HOUSEFORSALE_3, {
+    attribution: '',
+    interactive: true,
+    dataVar: 'json_HOUSEFORSALE_3',
+    layerName: 'layer_HOUSEFORSALE_3',
+    pane: 'pane_HOUSEFORSALE_3',
+    onEachFeature: pop_HOUSEFORSALE_3,
+    style: style_HOUSEFORSALE_3_0,
+});
+
+bounds_group.addLayer(layer_HOUSEFORSALE_3);
+map.addLayer(layer_HOUSEFORSALE_3);
+        function pop_GODOWN_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row"></th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_GODOWN_4_0() {
+            return {
+                pane: 'pane_GODOWN_4',
+                opacity: 1,
+                color: 'rgba(2,255,69,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_GODOWN_4');
+        map.getPane('pane_GODOWN_4').style.zIndex = 404;
+        map.getPane('pane_GODOWN_4').style['mix-blend-mode'] = 'normal';
+        var layer_GODOWN_4 = new L.geoJson(json_GODOWN_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_GODOWN_4',
+            layerName: 'layer_GODOWN_4',
+            pane: 'pane_GODOWN_4',
+            onEachFeature: pop_GODOWN_4,
+            style: style_GODOWN_4_0,
+        });
+        bounds_group.addLayer(layer_GODOWN_4);
+        map.addLayer(layer_GODOWN_4);
+        function pop_WAREHOUSE_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_WAREHOUSE_5_0() {
+            return {
+                pane: 'pane_WAREHOUSE_5',
+                opacity: 1,
+                color: 'rgba(255,155,25,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_WAREHOUSE_5');
+        map.getPane('pane_WAREHOUSE_5').style.zIndex = 405;
+        map.getPane('pane_WAREHOUSE_5').style['mix-blend-mode'] = 'normal';
+        var layer_WAREHOUSE_5 = new L.geoJson(json_WAREHOUSE_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_WAREHOUSE_5',
+            layerName: 'layer_WAREHOUSE_5',
+            pane: 'pane_WAREHOUSE_5',
+            onEachFeature: pop_WAREHOUSE_5,
+            style: style_WAREHOUSE_5_0,
+        });
+        bounds_group.addLayer(layer_WAREHOUSE_5);
+        map.addLayer(layer_WAREHOUSE_5);
+        function pop_RETAILSPACE_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_RETAILSPACE_6_0() {
+            return {
+                pane: 'pane_RETAILSPACE_6',
+                opacity: 1,
+                color: 'rgba(179,1,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_RETAILSPACE_6');
+        map.getPane('pane_RETAILSPACE_6').style.zIndex = 406;
+        map.getPane('pane_RETAILSPACE_6').style['mix-blend-mode'] = 'normal';
+        var layer_RETAILSPACE_6 = new L.geoJson(json_RETAILSPACE_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RETAILSPACE_6',
+            layerName: 'layer_RETAILSPACE_6',
+            pane: 'pane_RETAILSPACE_6',
+            onEachFeature: pop_RETAILSPACE_6,
+            style: style_RETAILSPACE_6_0,
+        });
+        bounds_group.addLayer(layer_RETAILSPACE_6);
+        map.addLayer(layer_RETAILSPACE_6);
+        function pop_OFFICESPACE_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row"></th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row"></th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+        function pop_OFFICESPACE_7(feature, layer) {
+    layer.on({
+        mouseout: function(e) {
+            // Start blinking when the mouse is out of the feature
+            e.target.getElement().classList.add('blink');
+
+            for (var i in e.target._eventParents) {
+                if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                    e.target._eventParents[i].resetStyle(e.target);
+                }
+            }
+
+            // Delay closing the popup by 3 seconds
+            setTimeout(function() {
+                if (typeof layer.closePopup == 'function') {
+                    layer.closePopup();
+                } else {
+                    layer.eachLayer(function(feature) {
+                        feature.closePopup();
+                    });
+                }
+            }, 3000);
+        },
+        mouseover: function(e) {
+            // Stop blinking when the mouse is over the feature
+            e.target.getElement().classList.remove('blink');
+            highlightFeature(e);
+        }
+    });
+
+    var popupContent = '<table>\
+        <tr>\
+            <th scope="row">No</th>\
+            <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Details</th>\
+            <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row"></th>\
+            <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row"></th>\
+            <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Contact</th>\
+            <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Contact2</th>\
+            <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+        </tr>\
+        <tr>\
+            <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+        </tr>\
+        <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtube-logo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+    </table>';
+
+    var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+
+    layer.on('popupopen', function(e) {
+        addClassToPopupIfMedia(content, e.popup);
+    });
+
+    layer.bindPopup(content, { maxHeight: 400 });
+
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+}
+
+function style_OFFICESPACE_7_0() {
+    return {
+        pane: 'pane_OFFICESPACE_7',
+        opacity: 1,
+        color: 'rgba(2,253,242,1.0)',
+        dashArray: '',
+        lineCap: 'butt',
+        lineJoin: 'miter',
+        weight: 5.0, 
+        fillOpacity: 0,
+        interactive: true,
+    }
+}
+
+map.createPane('pane_OFFICESPACE_7');
+map.getPane('pane_OFFICESPACE_7').style.zIndex = 407;
+map.getPane('pane_OFFICESPACE_7').style['mix-blend-mode'] = 'normal';
+
+var layer_OFFICESPACE_7 = new L.geoJson(json_OFFICESPACE_7, {
+    attribution: '',
+    interactive: true,
+    dataVar: 'json_OFFICESPACE_7',
+    layerName: 'layer_OFFICESPACE_7',
+    pane: 'pane_OFFICESPACE_7',
+    onEachFeature: pop_OFFICESPACE_7,
+    style: style_OFFICESPACE_7_0,
+});
+
+bounds_group.addLayer(layer_OFFICESPACE_7);
+map.addLayer(layer_OFFICESPACE_7);
+
+        function pop_57BEDROOM_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtube-logo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_57BEDROOM_8_0() {
+            return {
+                pane: 'pane_57BEDROOM_8',
+                opacity: 1,
+                color: 'rgba(240,23,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_57BEDROOM_8');
+        map.getPane('pane_57BEDROOM_8').style.zIndex = 408;
+        map.getPane('pane_57BEDROOM_8').style['mix-blend-mode'] = 'normal';
+        var layer_57BEDROOM_8 = new L.geoJson(json_57BEDROOM_8, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_57BEDROOM_8',
+            layerName: 'layer_57BEDROOM_8',
+            pane: 'pane_57BEDROOM_8',
+            onEachFeature: pop_57BEDROOM_8,
+            style: style_57BEDROOM_8_0,
+        });
+        bounds_group.addLayer(layer_57BEDROOM_8);
+        map.addLayer(layer_57BEDROOM_8);
+        function pop_34BEDROOM_9(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_34BEDROOM_9_0() {
+            return {
+                pane: 'pane_34BEDROOM_9',
+                opacity: 1,
+                color: 'rgba(10,159,252,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_34BEDROOM_9');
+        map.getPane('pane_34BEDROOM_9').style.zIndex = 409;
+        map.getPane('pane_34BEDROOM_9').style['mix-blend-mode'] = 'normal';
+        var layer_34BEDROOM_9 = new L.geoJson(json_34BEDROOM_9, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_34BEDROOM_9',
+            layerName: 'layer_34BEDROOM_9',
+            pane: 'pane_34BEDROOM_9',
+            onEachFeature: pop_34BEDROOM_9,
+            style: style_34BEDROOM_9_0,
+        });
+        bounds_group.addLayer(layer_34BEDROOM_9);
+        map.addLayer(layer_34BEDROOM_9);
+        function pop_2BEDROOM_10(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_2BEDROOM_10_0() {
+            return {
+                pane: 'pane_2BEDROOM_10',
+                opacity: 1,
+                color: 'rgba(247,48,193,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_2BEDROOM_10');
+        map.getPane('pane_2BEDROOM_10').style.zIndex = 410;
+        map.getPane('pane_2BEDROOM_10').style['mix-blend-mode'] = 'normal';
+        var layer_2BEDROOM_10 = new L.geoJson(json_2BEDROOM_10, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_2BEDROOM_10',
+            layerName: 'layer_2BEDROOM_10',
+            pane: 'pane_2BEDROOM_10',
+            onEachFeature: pop_2BEDROOM_10,
+            style: style_2BEDROOM_10_0,
+        });
+        bounds_group.addLayer(layer_2BEDROOM_10);
+        map.addLayer(layer_2BEDROOM_10);
+        function pop_1BEDROOM_11(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_1BEDROOM_11_0() {
+            return {
+                pane: 'pane_1BEDROOM_11',
+                opacity: 1,
+                color: 'rgba(255,179,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_1BEDROOM_11');
+        map.getPane('pane_1BEDROOM_11').style.zIndex = 411;
+        map.getPane('pane_1BEDROOM_11').style['mix-blend-mode'] = 'normal';
+        var layer_1BEDROOM_11 = new L.geoJson(json_1BEDROOM_11, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_1BEDROOM_11',
+            layerName: 'layer_1BEDROOM_11',
+            pane: 'pane_1BEDROOM_11',
+            onEachFeature: pop_1BEDROOM_11,
+            style: style_1BEDROOM_11_0,
+        });
+        bounds_group.addLayer(layer_1BEDROOM_11);
+        map.addLayer(layer_1BEDROOM_11);
+        function pop_SINGLEROOM_12(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_SINGLEROOM_12_0() {
+            return {
+                pane: 'pane_SINGLEROOM_12',
+                opacity: 1,
+                color: 'rgba(246,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_SINGLEROOM_12');
+        map.getPane('pane_SINGLEROOM_12').style.zIndex = 412;
+        map.getPane('pane_SINGLEROOM_12').style['mix-blend-mode'] = 'normal';
+        var layer_SINGLEROOM_12 = new L.geoJson(json_SINGLEROOM_12, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SINGLEROOM_12',
+            layerName: 'layer_SINGLEROOM_12',
+            pane: 'pane_SINGLEROOM_12',
+            onEachFeature: pop_SINGLEROOM_12,
+            style: style_SINGLEROOM_12_0,
+        });
+        bounds_group.addLayer(layer_SINGLEROOM_12);
+        map.addLayer(layer_SINGLEROOM_12);
+        function pop_BEDSITTER_13(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_BEDSITTER_13_0() {
+            return {
+                pane: 'pane_BEDSITTER_13',
+                opacity: 1,
+                color: 'rgba(128,255,9,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_BEDSITTER_13');
+        map.getPane('pane_BEDSITTER_13').style.zIndex = 413;
+        map.getPane('pane_BEDSITTER_13').style['mix-blend-mode'] = 'normal';
+        var layer_BEDSITTER_13 = new L.geoJson(json_BEDSITTER_13, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BEDSITTER_13',
+            layerName: 'layer_BEDSITTER_13',
+            pane: 'pane_BEDSITTER_13',
+            onEachFeature: pop_BEDSITTER_13,
+            style: style_BEDSITTER_13_0,
+        });
+        bounds_group.addLayer(layer_BEDSITTER_13);
+        map.addLayer(layer_BEDSITTER_13);
+        function pop_STUDIO_14(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+        }
+
+        function style_STUDIO_14_0() {
+            return {
+                pane: 'pane_STUDIO_14',
+                opacity: 1,
+                color: 'rgba(255,221,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_STUDIO_14');
+        map.getPane('pane_STUDIO_14').style.zIndex = 414;
+        map.getPane('pane_STUDIO_14').style['mix-blend-mode'] = 'normal';
+        var layer_STUDIO_14 = new L.geoJson(json_STUDIO_14, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_STUDIO_14',
+            layerName: 'layer_STUDIO_14',
+            pane: 'pane_STUDIO_14',
+            onEachFeature: pop_STUDIO_14,
+            style: style_STUDIO_14_0,
+        });
+        bounds_group.addLayer(layer_STUDIO_14);
+        map.addLayer(layer_STUDIO_14);
+        function pop_AIRbnb_15(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">No</th>\
+                        <td class="visible-with-data" id="No">' + (feature.properties['No'] !== null ? autolinker.link(feature.properties['No'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details</th>\
+                        <td class="visible-with-data" id="Details">' + (feature.properties['Details'] !== null ? autolinker.link(feature.properties['Details'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details2</th>\
+                        <td class="visible-with-data" id="Details2">' + (feature.properties['Details2'] !== null ? autolinker.link(feature.properties['Details2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Details3</th>\
+                        <td class="visible-with-data" id="Details3">' + (feature.properties['Details3'] !== null ? autolinker.link(feature.properties['Details3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact</th>\
+                        <td class="visible-with-data" id="Contact">' + (feature.properties['Contact'] !== null ? autolinker.link(feature.properties['Contact'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Contact2</th>\
+                        <td class="visible-with-data" id="Contact2">' + (feature.properties['Contact2'] !== null ? autolinker.link(feature.properties['Contact2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Picture</th>\
+                        <td class="visible-with-data" id="Picture">' + (feature.properties['Picture'] !== null ? '<img src="images/' + String(feature.properties['Picture']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+            <th scope="row">Links</th>\
+            <td>\
+                <div class="link-container">\
+                    <a href="path/to/document.pdf" target="_blank" class="pdf-link"><img src="pdflogo.png" alt="PDF" class="link-icon"> Open PDF</a>\
+                    <a href="path/to/video.mp4" target="_blank" class="video-link"><img src="Youtubelogo.png" alt="Video" class="link-icon"> Watch Video</a>\
+                    <a href="https://www.example.com" target="_blank" class="website-link"><img src="Weblogo.png" alt="Website" class="link-icon"> Visit Website</a>\
+                </div>\
+            </td>\
+        </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+            
+    // Ensure blinking starts immediately on page load
+    document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+        element.classList.add('blink');
+    });
+
+    // Add event listener to check if polygons are in view and blink accordingly
+    map.on('moveend', function() {
+        document.querySelectorAll('.leaflet-interactive').forEach(function(element) {
+            var layer = layer_OFFICESPACE_4.getLayer(element._leaflet_id);
+            if (layer && map.getBounds().contains(layer.getBounds())) {
+                element.classList.add('blink');
+            } else {
+                element.classList.remove('blink');
+            }
+        });
+    });
+
+
+
+        }
+
+        function style_AIRbnb_15_0() {
+            return {
+                pane: 'pane_AIRbnb_15',
+                opacity: 1,
+                color: 'rgba(227,47,12,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 5.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_AIRbnb_15');
+        map.getPane('pane_AIRbnb_15').style.zIndex = 415;
+        map.getPane('pane_AIRbnb_15').style['mix-blend-mode'] = 'normal';
+        var layer_AIRbnb_15 = new L.geoJson(json_AIRbnb_15, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_AIRbnb_15',
+            layerName: 'layer_AIRbnb_15',
+            pane: 'pane_AIRbnb_15',
+            onEachFeature: pop_AIRbnb_15,
+            style: style_AIRbnb_15_0,
+        });
+        bounds_group.addLayer(layer_AIRbnb_15);
+        map.addLayer(layer_AIRbnb_15);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: '<img src="legend/AIRbnb_15.png" /> AIRbnb', layer: layer_AIRbnb_15},
+            {label: '<img src="legend/STUDIO_14.png" /> STUDIO', layer: layer_STUDIO_14},
+            {label: '<img src="legend/BEDSITTER_13.png" /> BEDSITTER', layer: layer_BEDSITTER_13},
+            {label: '<img src="legend/SINGLEROOM_12.png" /> SINGLE ROOM', layer: layer_SINGLEROOM_12},
+            {label: '<img src="legend/1BEDROOM_11.png" /> 1 BEDROOM', layer: layer_1BEDROOM_11},
+            {label: '<img src="legend/2BEDROOM_10.png" /> 2 BEDROOM', layer: layer_2BEDROOM_10},
+            {label: '<img src="legend/34BEDROOM_9.png" /> 3-4 BEDROOM', layer: layer_34BEDROOM_9},
+            {label: '<img src="legend/57BEDROOM_8.png" /> 5-7 BEDROOM', layer: layer_57BEDROOM_8},
+            {label: '<img src="legend/OFFICESPACE_7.png" /> OFFICE SPACE', layer: layer_OFFICESPACE_7},
+            {label: '<img src="legend/RETAILSPACE_6.png" /> RETAIL SPACE', layer: layer_RETAILSPACE_6},
+            {label: '<img src="legend/WAREHOUSE_5.png" /> WAREHOUSE', layer: layer_WAREHOUSE_5},
+            {label: '<img src="legend/GODOWN_4.png" /> GODOWN', layer: layer_GODOWN_4},
+            {label: '<img src="legend/HOUSEFORSALE_3.png" /> HOUSE FOR SALE', layer: layer_HOUSEFORSALE_3},
+            {label: '<img src="legend/LANDFORSALE_2.png" /> LAND FOR SALE', layer: layer_LANDFORSALE_2},
+            {label: '<img src="legend/LANDFORLEASE_1.png" /> LAND FOR LEASE', layer: layer_LANDFORLEASE_1},
+            {label: "Google Hybrid", layer: layer_GoogleHybrid_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        </script>
+    </body>
+</html>

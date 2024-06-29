@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="styles.css">
+        <meta http-equiv="cache-control" content='no-cache'>
+        <meta http-equiv="expires" content='0'>
+        <meta http-equiv="pragma" content='no-cache'>
+    
+        <style>
+            html, body, #map {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                z-index: 1;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+
+            .content {
+                padding: 20px;
+                text-align: justify;
+                margin-left: 5%;
+                margin-right: 5%;
+                transition: transform 0.2s ease-in-out;
+            }
+
+            footer {
+                background-color: #f8f9fa;
+                padding: 10px 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .social-icons {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .social-icon {
+                width: 30px;
+                height: 30px;
+                margin: 0 10px;
+            }
+
+            .zoom-buttons {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .zoom-button {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 10px;
+                margin: 5px;
+                cursor: pointer;
+                font-size: 18px;
+                border-radius: 5px;
+            }
+
+            @media (max-width: 600px) {
+                .content {
+                    padding: 10px;
+                }
+
+                .social-icon {
+                    width: 25px;
+                    height: 25px;
+                    margin: 0 5px;
+                }
+            }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="Logo.png" alt="Company Logo" width="140" height="35">
+            </div>
+            <div class="logo-center">
+                <img src="Logo2.png" alt="Logo 2" width="180" height="35">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="About Us.html">ABOUT US</a></li>
+                <li><a href="Services.html">SERVICES</a></li>
+                <li><a href="Contact Us.html">CONTACT</a></li>
+            </ul>
+            <div class="dropdown">
+                <button class="dropbtn" onclick="toggleDropdown()">☰</button>
+                <div class="dropdown-content">
+                    <a href="index.html">HOME</a>
+                    <a href="About Us.html">ABOUT US</a>
+                    <a href="Services.html">SERVICES</a>
+                    <a href="Contact Us.html">CONTACT</a>
+                </div>
+            </div>
+        </nav>
+
+        <script>
+            function toggleDropdown() {
+                const dropdownContent = document.querySelector('.dropdown-content');
+                dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+            }
+
+            // Close the dropdown if the user clicks outside of it
+            window.onclick = function(event) {
+                if (!event.target.matches('.dropbtn')) {
+                    const dropdowns = document.getElementsByClassName('dropdown-content');
+                    for (let i = 0; i < dropdowns.length; i++) {
+                        const openDropdown = dropdowns[i];
+                        if (openDropdown.style.display === 'block') {
+                            openDropdown.style.display = 'none';
+                        }
+                    }
+                }
+            }
+
+            let zoomLevel = 1;
+            const contentElement = document.querySelector('.content');
+
+            function zoomIn() {
+                zoomLevel += 0.1;
+                applyZoom();
+            }
+
+            function zoomOut() {
+                if (zoomLevel > 0.1) {
+                    zoomLevel -= 0.1;
+                    applyZoom();
+                }
+            }
+
+            function applyZoom() {
+                contentElement.style.transform = `scale(${zoomLevel})`;
+                contentElement.style.transformOrigin = '0 0';
+            }
+        </script>
+
+        <div class="content">
+            <!-- Your main content here -->
+            Real Estate Market platform offers services in two main areas of professional expertise.
+            <h4>Real Estate Property Mapping</h4>
+            <p>Mapping the location of real estate property investments. This includes Residential Houses 
+                intended for commercial renting or selling, Office Spaces and Warehouses for commercial leasing, 
+                Land for Sale or Lease both for commercial and agricultural purposes.</p>
+
+            <h4>Professional land surveying and physical planning services</h4>
+            <p>Property ownership search services that involves land search to determine registered land owner 
+                as captured in the Lands Registry Records. Cadastral Map acquisition can be done on behalf of 
+                client from any land office countrywide where the estate is registered. Professional land surveying
+                and physical planning services is available when needed.</p>
+        </div>
+
+        <footer>
+            <div class="social-icons">
+                <a href="https://www.facebook.com" target="_blank">
+                    <img src="facebook-logo.png" alt="Facebook" class="social-icon">
+                </a>
+                <a href="https://www.twitter.com" target="_blank">
+                    <img src="x-logo.png" alt="x" class="social-icon">
+                </a>
+                <a href="https://www.instagram.com" target="_blank">
+                    <img src="instagram-logo.png" alt="Instagram" class="social-icon">
+                </a>
+                <a href="https://www.youtube.com" target="_blank">
+                    <img src="Youtube-logo.png" alt="YouTube" class="social-icon">
+                </a>
+            </div>
+        </footer>
+
+        <div class="zoom-buttons">
+            <button class="zoom-button" onclick="zoomIn()">+</button>
+            <button class="zoom-button" onclick="zoomOut()">-</button>
+        </div>
+    </body>
+</html>

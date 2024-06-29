@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="styles.css">
+        <meta http-equiv="cache-control"content='no-cache'>
+        <meta http-equiv="expires"content='0'>
+        <meta http-equiv="pragma"content='no-cache'>
+    
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            z-index: 1;
+        }
+
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.content {
+    padding: 20px;
+    text-align: center;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+.contact-info h1:hover {
+    transform: scale(1.03);
+}
+
+.contact-info h1 {
+    margin: 10px 0; 
+    transform: scale(1.03);
+
+}
+
+footer {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.social-icon {
+    width: 30px;
+    height: 30px;
+    margin: 0 10px;
+}
+
+@media (max-width: 600px) {
+    .content {
+        padding: 10px;
+        justify-content: flex-start;
+    }
+
+    .social-icon {
+        width: 25px;
+        height: 25px;
+        margin: 0 5px;
+    }
+    
+    .contact-info h1 {
+        font-size: 18px;
+        font-size: xx-large;
+    }
+
+    .disclaimer-section {
+        padding: 10px;
+    }
+}
+
+.disclaimer-section {
+    background-color: black;
+    padding: 20px;
+    margin-top: 20px;
+    text-align: justify;
+    transition: transform 0.3s;
+
+}
+
+.disclaimer {
+    color: red;
+    margin: 0;
+    text-align: center;
+    font-size: larger;
+}
+
+.disclaimer-text {
+    color: white;
+    margin: 10px 0 0 0;
+}
+.disclaimer-section:hover {
+    transform: scale(0.95);
+}
+@keyframes zoom-in-zoom-out {0% {
+    transform:scale(1,1);
+}
+50%{
+    transform: scale(1.5,1.5);
+}
+100%{
+    transform: scale(1,1);
+}
+}
+
+
+        </style>
+        <title></title>
+
+   </head>
+    <body>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="Logo.png" alt="Company Logo" width="140" height="35">
+            </div>
+            <div class="logo-center">
+                <img src="Logo2.png" alt="Logo 2" width="180" height="35">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="About Us.html">ABOUT US</a></li>
+                <li><a href="Services.html">SERVICES</a></li>
+                <li><a href="Contact Us.html">CONTACT</a></li>
+            </ul>
+            <div class="dropdown">
+                <button class="dropbtn" onclick="toggleDropdown()">☰</button>
+                <div class="dropdown-content">
+                    <a href="index.html">HOME</a>
+                    <a href="About Us.html">ABOUT US</a>
+                    <a href="Services.html">SERVICES</a>
+                    <a href="Contact Us.html">CONTACT</a>
+                </div>
+            </div>
+        </nav>
+        
+        <script>
+        function toggleDropdown() {
+            const dropdownContent = document.querySelector('.dropdown-content');
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                const dropdowns = document.getElementsByClassName('dropdown-content');
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.style.display === 'block') {
+                        openDropdown.style.display = 'none';
+                    }
+                }
+            }
+        }
+        </script>
+    
+    <div class="content">
+        <!-- Your main content here -->
+        <p>To better assist you, contact us via phone call, WhatsApp, send text message or email us.</p>
+        <div class="contact-info">
+            <h1>+254 712 263 859</h1>
+            <h2>kihimam@gmail.com</h2>
+        </div>
+        <div class="disclaimer-section">
+            <h4 class="disclaimer">DISCLAIMER!</h4>
+            <p class="disclaimer-text">Conducting due diligence is required at every step of a property transaction. 
+                It is crucial for the property purchaser to conduct due diligence
+                to ensure a smooth and secure transaction. Real Estate Market aim is to spatially locate the Real Estate Properties.</p>
+        </div>
+    </div>
+    
+        <footer>
+            <div class="social-icons">
+                <a href="https://www.facebook.com" target="_blank">
+                    <img src="facebook-logo.png" alt="Facebook" class="social-icon">
+                </a>
+                <a href="https://www.twitter.com" target="_blank">
+                    <img src="x-logo.png" alt="x" class="social-icon">
+                </a>
+                <a href="https://www.instagram.com" target="_blank">
+                    <img src="instagram-logo.png" alt="Instagram" class="social-icon">
+                </a>
+                <a href="https://www.youtube.com" target="_blank">
+                    <img src="Youtube-logo.png" alt="YouTube" class="social-icon">
+                </a>
+            </div>
+        </footer>           
+    </body>
+</html>
