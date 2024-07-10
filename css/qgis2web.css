@@ -1,20 +1,7 @@
 
         #map {
             background-color: #ffffff
-            
         }
-
-
-        .blink {
-            animation: blink-animation 1s steps(5, start) infinite;
-        }
-        
-        @keyframes blink-animation {
-            50% {
-                opacity: 0.5;
-            }
-        }
-
 
         @keyframes blink {
             0%, 50%, 100% {
@@ -201,17 +188,6 @@
                 align-self: flex-end;
             }
         }
-
-
-
-
-
-
-
-
-
-
-
         .info {
             padding: 6px 8px;
             font: 14px/16px Arial, Helvetica, sans-serif;
